@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://www.netbeans.org/ns/project/1">
+    <type>org.netbeans.modules.j2ee.clientproject</type>
+    <configuration>
+        <data xmlns="http://www.netbeans.org/ns/car-project/1">
+            <name>MusicPlayer</name>
+            <minimum-ant-version>1.6.5</minimum-ant-version>
+            <explicit-platform explicit-source-supported="true"/>
+            <source-roots>
+                <root id="src.dir"/>
+            </source-roots>
+            <test-roots>
+                <root id="test.src.dir"/>
+            </test-roots>
+            <included-library dirs="200">file.reference.mysql-connector-java-8.0.22.jar</included-library>
+            <included-library dirs="200">file.reference.javax.persistence-2.1.0.jar</included-library>
+            <included-library dirs="200">file.reference.org.eclipse.persistence.antlr-2.5.2.jar</included-library>
+            <included-library dirs="200">file.reference.org.eclipse.persistence.asm-2.5.2.jar</included-library>
+            <included-library dirs="200">file.reference.org.eclipse.persistence.core-2.5.2.jar</included-library>
+            <included-library dirs="200">file.reference.org.eclipse.persistence.jpa-2.5.2.jar</included-library>
+            <included-library dirs="200">file.reference.org.eclipse.persistence.jpa.jpql-2.5.2.jar</included-library>
+            <included-library dirs="200">file.reference.org.eclipse.persistence.jpa.modelgen.processor-2.5.2.jar</included-library>
+            <included-library dirs="200">file.reference.javaee-api-8.0.jar</included-library>
+        </data>
+    </configuration>
+</project>
