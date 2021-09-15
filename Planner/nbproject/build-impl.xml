@@ -810,6 +810,7 @@ exists or setup the property manually. For example like this:
         <!-- You can override this target in the ../build.xml file. -->
     </target>
     <target depends="compile" if="is.server.weblogic" name="library-inclusion-in-archive">
+        <basename file="${file.reference.javaee-api-8.0.jar}" property="manifest.file.reference.javaee-api-8.0.jar"/>
         <basename file="${file.reference.javax.persistence-2.1.0.jar}" property="manifest.file.reference.javax.persistence-2.1.0.jar"/>
         <basename file="${file.reference.org.eclipse.persistence.antlr-2.5.2.jar}" property="manifest.file.reference.org.eclipse.persistence.antlr-2.5.2.jar"/>
         <basename file="${file.reference.org.eclipse.persistence.asm-2.5.2.jar}" property="manifest.file.reference.org.eclipse.persistence.asm-2.5.2.jar"/>
@@ -817,20 +818,42 @@ exists or setup the property manually. For example like this:
         <basename file="${file.reference.org.eclipse.persistence.jpa-2.5.2.jar}" property="manifest.file.reference.org.eclipse.persistence.jpa-2.5.2.jar"/>
         <basename file="${file.reference.org.eclipse.persistence.jpa.jpql-2.5.2.jar}" property="manifest.file.reference.org.eclipse.persistence.jpa.jpql-2.5.2.jar"/>
         <basename file="${file.reference.org.eclipse.persistence.jpa.modelgen.processor-2.5.2.jar}" property="manifest.file.reference.org.eclipse.persistence.jpa.modelgen.processor-2.5.2.jar"/>
-        <basename file="${file.reference.javaee-api-8.0.jar}" property="manifest.file.reference.javaee-api-8.0.jar"/>
+        <basename file="${file.reference.mysql-connector-java-8.0.22.jar}" property="manifest.file.reference.mysql-connector-java-8.0.22.jar"/>
+        <basename file="${file.reference.javax.json-1.0.4.jar}" property="manifest.file.reference.javax.json-1.0.4.jar"/>
+        <basename file="${file.reference.org.eclipse.persistence.asm-2.7.0.jar}" property="manifest.file.reference.org.eclipse.persistence.asm-2.7.0.jar"/>
+        <basename file="${file.reference.org.eclipse.persistence.core-2.7.0.jar}" property="manifest.file.reference.org.eclipse.persistence.core-2.7.0.jar"/>
+        <basename file="${file.reference.org.eclipse.persistence.moxy-2.7.0.jar}" property="manifest.file.reference.org.eclipse.persistence.moxy-2.7.0.jar"/>
+        <basename file="${file.reference.validation-api-1.1.0.Final.jar}" property="manifest.file.reference.validation-api-1.1.0.Final.jar"/>
+        <basename file="${libs.restlib.classpath}" property="manifest.libs.restlib.classpath"/>
+        <basename file="${libs.JAXB-ENDORSED.classpath}" property="manifest.libs.JAXB-ENDORSED.classpath"/>
+        <basename file="${libs.jaxb.classpath}" property="manifest.libs.jaxb.classpath"/>
+        <basename file="${libs.restapi.classpath}" property="manifest.libs.restapi.classpath"/>
+        <basename file="${file.reference.json-simple-1.1.jar}" property="manifest.file.reference.json-simple-1.1.jar"/>
         <manifest file="${build.ear.classes.dir}/META-INF/MANIFEST.MF" mode="update">
-            <attribute name="Extension-List" value="jar-1 jar-2 jar-3 jar-4 jar-5 jar-6 jar-7 jar-8 "/>
-            <attribute name="jar-1-Extension-Name" value="${manifest.file.reference.javax.persistence-2.1.0.jar}"/>
-            <attribute name="jar-2-Extension-Name" value="${manifest.file.reference.org.eclipse.persistence.antlr-2.5.2.jar}"/>
-            <attribute name="jar-3-Extension-Name" value="${manifest.file.reference.org.eclipse.persistence.asm-2.5.2.jar}"/>
-            <attribute name="jar-4-Extension-Name" value="${manifest.file.reference.org.eclipse.persistence.core-2.5.2.jar}"/>
-            <attribute name="jar-5-Extension-Name" value="${manifest.file.reference.org.eclipse.persistence.jpa-2.5.2.jar}"/>
-            <attribute name="jar-6-Extension-Name" value="${manifest.file.reference.org.eclipse.persistence.jpa.jpql-2.5.2.jar}"/>
-            <attribute name="jar-7-Extension-Name" value="${manifest.file.reference.org.eclipse.persistence.jpa.modelgen.processor-2.5.2.jar}"/>
-            <attribute name="jar-8-Extension-Name" value="${manifest.file.reference.javaee-api-8.0.jar}"/>
+            <attribute name="Extension-List" value="jar-1 jar-2 jar-3 jar-4 jar-5 jar-6 jar-7 jar-8 jar-9 jar-10 jar-11 jar-12 jar-13 jar-14 jar-15 jar-16 jar-17 jar-18 jar-19 "/>
+            <attribute name="jar-1-Extension-Name" value="${manifest.file.reference.javaee-api-8.0.jar}"/>
+            <attribute name="jar-2-Extension-Name" value="${manifest.file.reference.javax.persistence-2.1.0.jar}"/>
+            <attribute name="jar-3-Extension-Name" value="${manifest.file.reference.org.eclipse.persistence.antlr-2.5.2.jar}"/>
+            <attribute name="jar-4-Extension-Name" value="${manifest.file.reference.org.eclipse.persistence.asm-2.5.2.jar}"/>
+            <attribute name="jar-5-Extension-Name" value="${manifest.file.reference.org.eclipse.persistence.core-2.5.2.jar}"/>
+            <attribute name="jar-6-Extension-Name" value="${manifest.file.reference.org.eclipse.persistence.jpa-2.5.2.jar}"/>
+            <attribute name="jar-7-Extension-Name" value="${manifest.file.reference.org.eclipse.persistence.jpa.jpql-2.5.2.jar}"/>
+            <attribute name="jar-8-Extension-Name" value="${manifest.file.reference.org.eclipse.persistence.jpa.modelgen.processor-2.5.2.jar}"/>
+            <attribute name="jar-9-Extension-Name" value="${manifest.file.reference.mysql-connector-java-8.0.22.jar}"/>
+            <attribute name="jar-10-Extension-Name" value="${manifest.file.reference.javax.json-1.0.4.jar}"/>
+            <attribute name="jar-11-Extension-Name" value="${manifest.file.reference.org.eclipse.persistence.asm-2.7.0.jar}"/>
+            <attribute name="jar-12-Extension-Name" value="${manifest.file.reference.org.eclipse.persistence.core-2.7.0.jar}"/>
+            <attribute name="jar-13-Extension-Name" value="${manifest.file.reference.org.eclipse.persistence.moxy-2.7.0.jar}"/>
+            <attribute name="jar-14-Extension-Name" value="${manifest.file.reference.validation-api-1.1.0.Final.jar}"/>
+            <attribute name="jar-15-Extension-Name" value="${manifest.libs.restlib.classpath}"/>
+            <attribute name="jar-16-Extension-Name" value="${manifest.libs.JAXB-ENDORSED.classpath}"/>
+            <attribute name="jar-17-Extension-Name" value="${manifest.libs.jaxb.classpath}"/>
+            <attribute name="jar-18-Extension-Name" value="${manifest.libs.restapi.classpath}"/>
+            <attribute name="jar-19-Extension-Name" value="${manifest.file.reference.json-simple-1.1.jar}"/>
         </manifest>
     </target>
     <target depends="compile" if="dist.ear.dir" name="library-inclusion-in-manifest">
+        <copyfiles files="${file.reference.javaee-api-8.0.jar}" manifestproperty="manifest.file.reference.javaee-api-8.0.jar" todir="${dist.ear.dir}/lib"/>
         <copyfiles files="${file.reference.javax.persistence-2.1.0.jar}" manifestproperty="manifest.file.reference.javax.persistence-2.1.0.jar" todir="${dist.ear.dir}/lib"/>
         <copyfiles files="${file.reference.org.eclipse.persistence.antlr-2.5.2.jar}" manifestproperty="manifest.file.reference.org.eclipse.persistence.antlr-2.5.2.jar" todir="${dist.ear.dir}/lib"/>
         <copyfiles files="${file.reference.org.eclipse.persistence.asm-2.5.2.jar}" manifestproperty="manifest.file.reference.org.eclipse.persistence.asm-2.5.2.jar" todir="${dist.ear.dir}/lib"/>
@@ -838,9 +861,19 @@ exists or setup the property manually. For example like this:
         <copyfiles files="${file.reference.org.eclipse.persistence.jpa-2.5.2.jar}" manifestproperty="manifest.file.reference.org.eclipse.persistence.jpa-2.5.2.jar" todir="${dist.ear.dir}/lib"/>
         <copyfiles files="${file.reference.org.eclipse.persistence.jpa.jpql-2.5.2.jar}" manifestproperty="manifest.file.reference.org.eclipse.persistence.jpa.jpql-2.5.2.jar" todir="${dist.ear.dir}/lib"/>
         <copyfiles files="${file.reference.org.eclipse.persistence.jpa.modelgen.processor-2.5.2.jar}" manifestproperty="manifest.file.reference.org.eclipse.persistence.jpa.modelgen.processor-2.5.2.jar" todir="${dist.ear.dir}/lib"/>
-        <copyfiles files="${file.reference.javaee-api-8.0.jar}" manifestproperty="manifest.file.reference.javaee-api-8.0.jar" todir="${dist.ear.dir}/lib"/>
+        <copyfiles files="${file.reference.mysql-connector-java-8.0.22.jar}" manifestproperty="manifest.file.reference.mysql-connector-java-8.0.22.jar" todir="${dist.ear.dir}/lib"/>
+        <copyfiles files="${file.reference.javax.json-1.0.4.jar}" manifestproperty="manifest.file.reference.javax.json-1.0.4.jar" todir="${dist.ear.dir}/lib"/>
+        <copyfiles files="${file.reference.org.eclipse.persistence.asm-2.7.0.jar}" manifestproperty="manifest.file.reference.org.eclipse.persistence.asm-2.7.0.jar" todir="${dist.ear.dir}/lib"/>
+        <copyfiles files="${file.reference.org.eclipse.persistence.core-2.7.0.jar}" manifestproperty="manifest.file.reference.org.eclipse.persistence.core-2.7.0.jar" todir="${dist.ear.dir}/lib"/>
+        <copyfiles files="${file.reference.org.eclipse.persistence.moxy-2.7.0.jar}" manifestproperty="manifest.file.reference.org.eclipse.persistence.moxy-2.7.0.jar" todir="${dist.ear.dir}/lib"/>
+        <copyfiles files="${file.reference.validation-api-1.1.0.Final.jar}" manifestproperty="manifest.file.reference.validation-api-1.1.0.Final.jar" todir="${dist.ear.dir}/lib"/>
+        <copyfiles files="${libs.restlib.classpath}" manifestproperty="manifest.libs.restlib.classpath" todir="${dist.ear.dir}/lib"/>
+        <copyfiles files="${libs.JAXB-ENDORSED.classpath}" manifestproperty="manifest.libs.JAXB-ENDORSED.classpath" todir="${dist.ear.dir}/lib"/>
+        <copyfiles files="${libs.jaxb.classpath}" manifestproperty="manifest.libs.jaxb.classpath" todir="${dist.ear.dir}/lib"/>
+        <copyfiles files="${libs.restapi.classpath}" manifestproperty="manifest.libs.restapi.classpath" todir="${dist.ear.dir}/lib"/>
+        <copyfiles files="${file.reference.json-simple-1.1.jar}" manifestproperty="manifest.file.reference.json-simple-1.1.jar" todir="${dist.ear.dir}/lib"/>
         <manifest file="${build.ear.classes.dir}/META-INF/MANIFEST.MF" mode="update">
-            <attribute name="Class-Path" value="${manifest.file.reference.javax.persistence-2.1.0.jar} lib/${manifest.file.reference.javax.persistence-2.1.0.jar} ${manifest.file.reference.org.eclipse.persistence.antlr-2.5.2.jar} lib/${manifest.file.reference.org.eclipse.persistence.antlr-2.5.2.jar} ${manifest.file.reference.org.eclipse.persistence.asm-2.5.2.jar} lib/${manifest.file.reference.org.eclipse.persistence.asm-2.5.2.jar} ${manifest.file.reference.org.eclipse.persistence.core-2.5.2.jar} lib/${manifest.file.reference.org.eclipse.persistence.core-2.5.2.jar} ${manifest.file.reference.org.eclipse.persistence.jpa-2.5.2.jar} lib/${manifest.file.reference.org.eclipse.persistence.jpa-2.5.2.jar} ${manifest.file.reference.org.eclipse.persistence.jpa.jpql-2.5.2.jar} lib/${manifest.file.reference.org.eclipse.persistence.jpa.jpql-2.5.2.jar} ${manifest.file.reference.org.eclipse.persistence.jpa.modelgen.processor-2.5.2.jar} lib/${manifest.file.reference.org.eclipse.persistence.jpa.modelgen.processor-2.5.2.jar} ${manifest.file.reference.javaee-api-8.0.jar} lib/${manifest.file.reference.javaee-api-8.0.jar} "/>
+            <attribute name="Class-Path" value="${manifest.file.reference.javaee-api-8.0.jar} lib/${manifest.file.reference.javaee-api-8.0.jar} ${manifest.file.reference.javax.persistence-2.1.0.jar} lib/${manifest.file.reference.javax.persistence-2.1.0.jar} ${manifest.file.reference.org.eclipse.persistence.antlr-2.5.2.jar} lib/${manifest.file.reference.org.eclipse.persistence.antlr-2.5.2.jar} ${manifest.file.reference.org.eclipse.persistence.asm-2.5.2.jar} lib/${manifest.file.reference.org.eclipse.persistence.asm-2.5.2.jar} ${manifest.file.reference.org.eclipse.persistence.core-2.5.2.jar} lib/${manifest.file.reference.org.eclipse.persistence.core-2.5.2.jar} ${manifest.file.reference.org.eclipse.persistence.jpa-2.5.2.jar} lib/${manifest.file.reference.org.eclipse.persistence.jpa-2.5.2.jar} ${manifest.file.reference.org.eclipse.persistence.jpa.jpql-2.5.2.jar} lib/${manifest.file.reference.org.eclipse.persistence.jpa.jpql-2.5.2.jar} ${manifest.file.reference.org.eclipse.persistence.jpa.modelgen.processor-2.5.2.jar} lib/${manifest.file.reference.org.eclipse.persistence.jpa.modelgen.processor-2.5.2.jar} ${manifest.file.reference.mysql-connector-java-8.0.22.jar} lib/${manifest.file.reference.mysql-connector-java-8.0.22.jar} ${manifest.file.reference.javax.json-1.0.4.jar} lib/${manifest.file.reference.javax.json-1.0.4.jar} ${manifest.file.reference.org.eclipse.persistence.asm-2.7.0.jar} lib/${manifest.file.reference.org.eclipse.persistence.asm-2.7.0.jar} ${manifest.file.reference.org.eclipse.persistence.core-2.7.0.jar} lib/${manifest.file.reference.org.eclipse.persistence.core-2.7.0.jar} ${manifest.file.reference.org.eclipse.persistence.moxy-2.7.0.jar} lib/${manifest.file.reference.org.eclipse.persistence.moxy-2.7.0.jar} ${manifest.file.reference.validation-api-1.1.0.Final.jar} lib/${manifest.file.reference.validation-api-1.1.0.Final.jar} ${manifest.libs.restlib.classpath} lib/${manifest.libs.restlib.classpath} ${manifest.libs.JAXB-ENDORSED.classpath} lib/${manifest.libs.JAXB-ENDORSED.classpath} ${manifest.libs.jaxb.classpath} lib/${manifest.libs.jaxb.classpath} ${manifest.libs.restapi.classpath} lib/${manifest.libs.restapi.classpath} ${manifest.file.reference.json-simple-1.1.jar} lib/${manifest.file.reference.json-simple-1.1.jar} "/>
         </manifest>
     </target>
     <target name="-copy-meta-inf">

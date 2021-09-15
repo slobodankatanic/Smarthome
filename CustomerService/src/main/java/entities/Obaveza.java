@@ -21,6 +21,7 @@ import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
 import javax.xml.bind.annotation.XmlRootElement;
 
 /**
@@ -34,7 +35,8 @@ import javax.xml.bind.annotation.XmlRootElement;
     @NamedQuery(name = "Obaveza.findAll", query = "SELECT o FROM Obaveza o"),
     @NamedQuery(name = "Obaveza.findByIdO", query = "SELECT o FROM Obaveza o WHERE o.idO = :idO"),
     @NamedQuery(name = "Obaveza.findByPocetak", query = "SELECT o FROM Obaveza o WHERE o.pocetak = :pocetak"),
-    @NamedQuery(name = "Obaveza.findByTrajanje", query = "SELECT o FROM Obaveza o WHERE o.trajanje = :trajanje")})
+    @NamedQuery(name = "Obaveza.findByTrajanje", query = "SELECT o FROM Obaveza o WHERE o.trajanje = :trajanje"),
+    @NamedQuery(name = "Obaveza.findByLocation", query = "SELECT o FROM Obaveza o WHERE o.location = :location")})
 public class Obaveza implements Serializable {
 
     private static final long serialVersionUID = 1L;
@@ -51,13 +53,14 @@ public class Obaveza implements Serializable {
     @Basic(optional = false)
     @NotNull
     @Column(name = "Trajanje")
-    private int trajanje;
+    @Temporal(TemporalType.TIME)
+    private Date trajanje;
+    @Size(max = 256)
+    @Column(name = "location")
+    private String location;
     @JoinColumn(name = "IdK", referencedColumnName = "IdK")
     @ManyToOne(optional = false)
     private Korisnik idK;
-    @JoinColumn(name = "IdL", referencedColumnName = "IdL")
-    @ManyToOne
-    private Lokacija idL;
 
     public Obaveza() {
     }
@@ -66,7 +69,7 @@ public class Obaveza implements Serializable {
         this.idO = idO;
     }
 
-    public Obaveza(Integer idO, Date pocetak, int trajanje) {
+    public Obaveza(Integer idO, Date pocetak, Date trajanje) {
         this.idO = idO;
         this.pocetak = pocetak;
         this.trajanje = trajanje;
@@ -88,12 +91,20 @@ public class Obaveza implements Serializable {
         this.pocetak = pocetak;
     }
 
-    public int getTrajanje() {
+    public Date getTrajanje() {
         return trajanje;
     }
 
-    public void setTrajanje(int trajanje) {
+    public void setTrajanje(Date trajanje) {
         this.trajanje = trajanje;
+    }
+
+    public String getLocation() {
+        return location;
+    }
+
+    public void setLocation(String location) {
+        this.location = location;
     }
 
     public Korisnik getIdK() {
@@ -102,14 +113,6 @@ public class Obaveza implements Serializable {
 
     public void setIdK(Korisnik idK) {
         this.idK = idK;
-    }
-
-    public Lokacija getIdL() {
-        return idL;
-    }
-
-    public void setIdL(Lokacija idL) {
-        this.idL = idL;
     }
 
     @Override

@@ -123,7 +123,7 @@ public class AlarmResource {
     }
     
        
-    @PUT
+    @POST
     @Path("{idA}/{idS}")
     public Response setRingtone(@PathParam("idA") int idA, @PathParam("idS") int idS,
                                 @Context HttpHeaders httpHeaders) {

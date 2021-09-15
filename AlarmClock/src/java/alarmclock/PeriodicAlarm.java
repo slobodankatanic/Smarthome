@@ -33,15 +33,19 @@ public class PeriodicAlarm extends Thread {
     @Override
     public void run() {
         EntityManagerFactory emf = Persistence.createEntityManagerFactory("AlarmClockPU");
-        EntityManager em = emf.createEntityManager();
-        // Alarm alarm = em.find(Alarm.class, idA);
+        EntityManager em = emf.createEntityManager();                
+        Alarm alarm = em.find(Alarm.class, idA);
         // Pesma song = em.find(Pesma.class, alarm.getIdP().getIdP());
         
         while(true) {
-            try {                
-                Alarm alarm = em.find(Alarm.class, idA);                
+            try {                                                                
+                if (alarm == null) {
+                    return;
+                }
+                Thread.sleep(alarm.getPerioda() * 1000);                
+                em.clear();
+                alarm = em.find(Alarm.class, idA);                                
                 Pesma song = em.find(Pesma.class, alarm.getIdP().getIdP());
-                Thread.sleep(alarm.getPerioda() * 1000);
                 if (Desktop.isDesktopSupported()) {
                     if (song != null) {
                         Desktop.getDesktop().browse(new URI(song.getUrl()));

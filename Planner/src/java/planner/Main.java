@@ -22,9 +22,9 @@ public class Main {
     
     @Resource(lookup = "plannerReceiveTopic")
     static Topic plannerReceiveTopic;
-   
+    
     public static void main(String[] args) {
-        // TODO code application logic here
+        new TaskManipulator().start();
     }
     
 }

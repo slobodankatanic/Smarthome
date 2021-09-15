@@ -3,6 +3,10 @@
   <!-- Define Persistence Unit -->
   <persistence-unit name="my_persistence_unit" transaction-type="JTA">
     <jta-data-source>shResource</jta-data-source>
+    <class>entities.Obaveza</class>
+    <class>entities.Alarm</class>
+    <class>entities.Pesma</class>
+    <class>entities.Korisnik</class>
     <exclude-unlisted-classes>false</exclude-unlisted-classes>
   </persistence-unit>
 </persistence>

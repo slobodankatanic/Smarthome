@@ -16,7 +16,7 @@ public class TaskData implements Serializable {
     private int UserId;
     private Date date;
     private String dest;
-    private int dur;
+    private Date dur;
 
     public int getUserId() {
         return UserId;
@@ -42,11 +42,11 @@ public class TaskData implements Serializable {
         this.dest = dest;
     }
 
-    public int getDur() {
+    public Date getDur() {
         return dur;
     }
 
-    public void setDur(int dur) {
+    public void setDur(Date dur) {
         this.dur = dur;
     }
     

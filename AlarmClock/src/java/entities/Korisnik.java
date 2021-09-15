@@ -17,7 +17,6 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
-import javax.persistence.ManyToOne;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.OneToMany;
@@ -38,7 +37,8 @@ import javax.xml.bind.annotation.XmlTransient;
     @NamedQuery(name = "Korisnik.findAll", query = "SELECT k FROM Korisnik k"),
     @NamedQuery(name = "Korisnik.findByIdK", query = "SELECT k FROM Korisnik k WHERE k.idK = :idK"),
     @NamedQuery(name = "Korisnik.findByUsername", query = "SELECT k FROM Korisnik k WHERE k.username = :username"),
-    @NamedQuery(name = "Korisnik.findByPassword", query = "SELECT k FROM Korisnik k WHERE k.password = :password")})
+    @NamedQuery(name = "Korisnik.findByPassword", query = "SELECT k FROM Korisnik k WHERE k.password = :password"),
+    @NamedQuery(name = "Korisnik.findByLocation", query = "SELECT k FROM Korisnik k WHERE k.location = :location")})
 public class Korisnik implements Serializable {
 
     private static final long serialVersionUID = 1L;
@@ -57,6 +57,11 @@ public class Korisnik implements Serializable {
     @Size(min = 1, max = 45)
     @Column(name = "password")
     private String password;
+    @Basic(optional = false)
+    @NotNull
+    @Size(min = 1, max = 256)
+    @Column(name = "location")
+    private String location;
     @JoinTable(name = "odslusao", joinColumns = {
         @JoinColumn(name = "IdK", referencedColumnName = "IdK")}, inverseJoinColumns = {
         @JoinColumn(name = "IdP", referencedColumnName = "IdP")})
@@ -66,9 +71,6 @@ public class Korisnik implements Serializable {
     private List<Alarm> alarmList;
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "idK")
     private List<Obaveza> obavezaList;
-    @JoinColumn(name = "IdL", referencedColumnName = "IdL")
-    @ManyToOne(optional = false)
-    private Lokacija idL;
 
     public Korisnik() {
     }
@@ -77,10 +79,11 @@ public class Korisnik implements Serializable {
         this.idK = idK;
     }
 
-    public Korisnik(Integer idK, String username, String password) {
+    public Korisnik(Integer idK, String username, String password, String location) {
         this.idK = idK;
         this.username = username;
         this.password = password;
+        this.location = location;
     }
 
     public Integer getIdK() {
@@ -105,6 +108,14 @@ public class Korisnik implements Serializable {
 
     public void setPassword(String password) {
         this.password = password;
+    }
+
+    public String getLocation() {
+        return location;
+    }
+
+    public void setLocation(String location) {
+        this.location = location;
     }
 
     @XmlTransient
@@ -132,14 +143,6 @@ public class Korisnik implements Serializable {
 
     public void setObavezaList(List<Obaveza> obavezaList) {
         this.obavezaList = obavezaList;
-    }
-
-    public Lokacija getIdL() {
-        return idL;
-    }
-
-    public void setIdL(Lokacija idL) {
-        this.idL = idL;
     }
 
     @Override

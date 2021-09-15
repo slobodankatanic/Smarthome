@@ -67,7 +67,8 @@ public class RegularAlarm extends Thread {
                 long alarmLeft = timeDifference(calC, calA);
                 System.out.println(alarmLeft);
                 Thread.sleep(alarmLeft);
-                
+                                
+                em.clear();
                 alarm = em.find(Alarm.class, idA);
                 Pesma song = em.find(Pesma.class, alarm.getIdP().getIdP());
                 

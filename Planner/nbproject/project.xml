@@ -12,6 +12,7 @@
             <test-roots>
                 <root id="test.src.dir"/>
             </test-roots>
+            <included-library dirs="200">file.reference.javaee-api-8.0.jar</included-library>
             <included-library dirs="200">file.reference.javax.persistence-2.1.0.jar</included-library>
             <included-library dirs="200">file.reference.org.eclipse.persistence.antlr-2.5.2.jar</included-library>
             <included-library dirs="200">file.reference.org.eclipse.persistence.asm-2.5.2.jar</included-library>
@@ -19,7 +20,17 @@
             <included-library dirs="200">file.reference.org.eclipse.persistence.jpa-2.5.2.jar</included-library>
             <included-library dirs="200">file.reference.org.eclipse.persistence.jpa.jpql-2.5.2.jar</included-library>
             <included-library dirs="200">file.reference.org.eclipse.persistence.jpa.modelgen.processor-2.5.2.jar</included-library>
-            <included-library dirs="200">file.reference.javaee-api-8.0.jar</included-library>
+            <included-library dirs="200">file.reference.mysql-connector-java-8.0.22.jar</included-library>
+            <included-library dirs="200">file.reference.javax.json-1.0.4.jar</included-library>
+            <included-library dirs="200">file.reference.org.eclipse.persistence.asm-2.7.0.jar</included-library>
+            <included-library dirs="200">file.reference.org.eclipse.persistence.core-2.7.0.jar</included-library>
+            <included-library dirs="200">file.reference.org.eclipse.persistence.moxy-2.7.0.jar</included-library>
+            <included-library dirs="200">file.reference.validation-api-1.1.0.Final.jar</included-library>
+            <included-library dirs="200">libs.restlib.classpath</included-library>
+            <included-library dirs="200">libs.JAXB-ENDORSED.classpath</included-library>
+            <included-library dirs="200">libs.jaxb.classpath</included-library>
+            <included-library dirs="200">libs.restapi.classpath</included-library>
+            <included-library dirs="200">file.reference.json-simple-1.1.jar</included-library>
         </data>
     </configuration>
 </project>

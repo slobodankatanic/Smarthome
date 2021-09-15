@@ -6,56 +6,163 @@
 package measurer;
 
 import entities.Korisnik;
-import entities.Lokacija;
 import entities.Obaveza;
 import static java.lang.Math.toRadians;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
+import javax.ws.rs.client.Client;
+import javax.ws.rs.client.ClientBuilder;
+import javax.ws.rs.core.Response;
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
 
 /**
  *
  * @author pc
  */
-public class DistanceMeasurer {
-    
-    public static long distance(Lokacija l1, Lokacija l2) {
-        double lat1 = l1.getLatitude();
-        double lon1 = l1.getLongitude();
-        double lat2 = l2.getLatitude();
-        double lon2 = l2.getLongitude();
+public class DistanceMeasurer {    
+            
+    public static long distance(String location1, String location2) {
+        try {
+            Client client = ClientBuilder.newClient();
+            
+            Response responseLocation1 = client
+                    .target("https://geocode.search.hereapi.com/v1/geocode")
+                    .queryParam("q", location1)
+                    .queryParam("limit", 1)
+                    .queryParam("apiKey", "DSitrL2u9LkOmaI7v2mzO9KYJlX08lcAwPFqCQD13YE")
+                    .request()
+                    .get();
+            
+            Response responseLocation2 = client
+                    .target("https://geocode.search.hereapi.com/v1/geocode")
+                    .queryParam("q", location2)
+                    .queryParam("limit", 1)
+                    .queryParam("apiKey", "DSitrL2u9LkOmaI7v2mzO9KYJlX08lcAwPFqCQD13YE")
+                    .request()
+                    .get();
+            
+            if (responseLocation1 == null || responseLocation2 == null) {
+                return -1;
+            }
+            
+            String jsonLocation1 = responseLocation1.readEntity(String.class);
+            String jsonLocation2 = responseLocation1.readEntity(String.class);
+            
+            if (jsonLocation1 == null || jsonLocation1.length() == 0 ||
+                jsonLocation2 == null || jsonLocation2.length() == 0) {
+                return -1;
+            }
+            
+            JSONParser parser = new JSONParser();
+            
+            JSONObject jsonObject1 = (JSONObject) parser.parse(jsonLocation1);
+            JSONObject jsonObject2 = (JSONObject) parser.parse(jsonLocation2);
+            
+            if (jsonObject1 == null || jsonObject2 == null) {
+                return -1;
+            }
+            
+            if (!jsonObject1.containsKey("items") || !jsonObject2.containsKey("items")) {
+                return -1;
+            }
+            
+            JSONArray items1 = (JSONArray) jsonObject1.get("items");
+            JSONArray items2 = (JSONArray) jsonObject2.get("items");
+            
+            if (items1.size() == 0 || items1.size() == 0) {
+                return -1;
+            }
+            
+            JSONObject itemsObject1 = (JSONObject) items1.get(0);
+            JSONObject itemsObject2 = (JSONObject) items2.get(0);
+            
+            if (!itemsObject1.containsKey("position") || !itemsObject2.containsKey("position")) {
+                return -1;
+            }
+            
+            JSONObject position1 = (JSONObject) itemsObject1.get("position");
+            JSONObject position2 = (JSONObject) itemsObject2.get("position");
+            
+            if (!position1.containsKey("lng") || !position1.containsKey("lat") ||
+                !position2.containsKey("lng") || !position2.containsKey("lat")) {
+                return -1;
+            }
+            
+            double lat1 = (double) position1.get("lat");
+            double lng1 = (double) position1.get("lng");            
+            
+            double lat2 = (double) position2.get("lat");
+            double lng2 = (double) position2.get("lng");                                                            
+            
+            Response responseDuration = client
+                .target("https://router.hereapi.com/v8/routes")
+                .queryParam("origin", lat1 + "," + lng1)
+                .queryParam("destination", lat2 + "," + lng2)
+                .queryParam("return", "summary,typicalDuration")
+                .queryParam("transportMode", "car")
+                .queryParam("apiKey", "DSitrL2u9LkOmaI7v2mzO9KYJlX08lcAwPFqCQD13YE")
+                .request()
+                .get();                                
+            
+            if (responseDuration == null) {
+                return -1;
+            }
+            
+            String durationJsonString = responseDuration.readEntity(String.class);
+            
+            if (durationJsonString == null || durationJsonString.length() == 0) {
+                return -1;
+            }                        
+            
+            JSONObject durationJsonObject = (JSONObject) parser.parse(durationJsonString);
+            
+            if (durationJsonObject == null || !durationJsonObject.containsKey("routes")) {
+                return -1;
+            }
+            
+            JSONArray routesArray = (JSONArray) durationJsonObject.get("routes");
+            
+            if (routesArray.size() == 0) {
+                return -1;
+            }
+            
+            JSONObject routesObject = (JSONObject) routesArray.get(0);
+            
+            if (!routesObject.containsKey("sections")) {
+                return -1;
+            }
+            
+            JSONArray sectionsArray = (JSONArray) routesObject.get("sections");
+            
+            if (sectionsArray.size() == 0) {
+                return -1;
+            }
+            
+            JSONObject sectionsObject = (JSONObject) sectionsArray.get(0);
+            
+            if (!sectionsObject.containsKey("summary")) {
+                return -1;
+            }
+            
+            JSONObject summaryObject = (JSONObject) sectionsObject.get("summary");
+            
+            if (!summaryObject.containsKey("duration")) {
+                return -1;
+            }
+                                    
+            return (long) summaryObject.get("duration");
+            
+        } catch (ParseException ex) {
+            Logger.getLogger(DistanceMeasurer.class.getName()).log(Level.SEVERE, null, ex);
+        }
         
-        lon1 = Math.toRadians(lon1); 
-        lon2 = Math.toRadians(lon2); 
-        lat1 = Math.toRadians(lat1); 
-        lat2 = Math.toRadians(lat2); 
-  
-        // Haversine formula  
-        double dlon = lon2 - lon1;  
-        double dlat = lat2 - lat1; 
-        double a = Math.pow(Math.sin(dlat / 2), 2) 
-                 + Math.cos(lat1) * Math.cos(lat2) 
-                 * Math.pow(Math.sin(dlon / 2),2); 
-              
-        double c = 2 * Math.asin(Math.sqrt(a)); 
-  
-        // Radius of earth in kilometers. Use 3956  
-        // for miles 
-        double r = 6371; 
-  
-        // calculate the result 
-        return (long) (c * r); 
-    }
-    
-    public static long distanceFromCurrentLocation(Lokacija l1, int idK) {
-        EntityManagerFactory emf = Persistence.createEntityManagerFactory("PlannerPU");
-        EntityManager em = emf.createEntityManager();
-        
-        Korisnik user = em.find(Korisnik.class, idK);
-        List<Obaveza> tasks = user.getObavezaList();
-        Obaveza current = null;
-        
-        return 0;
+        return -1;
     }
 }
