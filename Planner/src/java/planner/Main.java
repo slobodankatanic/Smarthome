@@ -5,9 +5,18 @@
  */
 package planner;
 
+import java.io.IOException;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.annotation.Resource;
 import javax.jms.ConnectionFactory;
 import javax.jms.Topic;
+import javax.ws.rs.client.Client;
+import javax.ws.rs.client.ClientBuilder;
+import javax.ws.rs.core.Response;
 
 /**
  *
@@ -23,8 +32,9 @@ public class Main {
     @Resource(lookup = "plannerReceiveTopic")
     static Topic plannerReceiveTopic;
     
-    public static void main(String[] args) {
+    public static void main(String[] args) {        
         new TaskManipulator().start();
+        new TimeMeasurer().start();                       
     }
     
 }

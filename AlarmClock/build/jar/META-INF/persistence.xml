@@ -5,8 +5,7 @@
     <class>entities.Korisnik</class>
     <class>entities.Alarm</class>
     <class>entities.Pesma</class>
-    <class>entities.Obaveza</class>
-    <class>entities.Lokacija</class>
+    <class>entities.Obaveza</class>    
     <properties>
       <property name="javax.persistence.jdbc.url" value="jdbc:mysql://localhost:3308/smarthome?zeroDateTimeBehavior=CONVERT_TO_NULL"/>
       <property name="javax.persistence.jdbc.user" value="root"/>

@@ -116,14 +116,14 @@ public class PlannerResource {
             hours = Integer.parseInt(duration[0]);
             mins = Integer.parseInt(duration[1]);
             
-            Calendar calDur = Calendar.getInstance();
+            /*Calendar calDur = Calendar.getInstance();
             calDur.set(Calendar.HOUR_OF_DAY, hours);
             calDur.set(Calendar.MINUTE, mins);
             calDur.set(Calendar.SECOND, 0);
-            Date durTime = calDur.getTime();           
+            Date durTime = calDur.getTime();*/
             
             TaskData task = new TaskData();
-            task.setDur(durTime);
+            task.setMinutesDuration(hours * 60 + mins);
             task.setUserId(user.getIdK());
             task.setDate(dt);
             if (dest != null) task.setDest(dest);
@@ -229,10 +229,122 @@ public class PlannerResource {
     
     @POST
     @Path("edit/{idO}")  
-    public Response editTask(@PathParam("idO") int idO, @QueryParam("date") String date,            
-            @QueryParam("duration") String duration, @QueryParam("destination") String destination,
-            @Context HttpHeaders httpHeaders) {
-        return null;
+    public Response editTask(@PathParam("idO") int idO, @QueryParam("date") String date, @QueryParam("time") String time,            
+                @QueryParam("duration") String duration, @QueryParam("destination") String destination,
+                @Context HttpHeaders httpHeaders) {
+        
+        try {
+            List<String> authHeaderValues = httpHeaders.getRequestHeader("Authorization");
+            String username = null;
+            String password = null;
+            if(authHeaderValues != null && authHeaderValues.size() > 0){
+                String authHeaderValue = authHeaderValues.get(0);
+                String decodedAuthHeaderValue = new String(Base64.getDecoder().decode(authHeaderValue.replaceFirst("Basic ", "")),StandardCharsets.UTF_8);
+                StringTokenizer stringTokenizer = new StringTokenizer(decodedAuthHeaderValue, ":");
+                username = stringTokenizer.nextToken();
+                password = stringTokenizer.nextToken();
+            }
+            
+            EntityManagerFactory emf = Persistence.createEntityManagerFactory("my_persistence_unit");
+            EntityManager em = emf.createEntityManager();
+            
+            TypedQuery<Korisnik> q =
+                    em.createQuery("select kor from Korisnik kor where kor.password = :password and kor.username = :username", Korisnik.class);
+            q.setParameter("password", password);
+            q.setParameter("username", username);
+            
+            Korisnik user = q.getSingleResult();                            
+            
+            if (user == null) {
+                return Response.status(Response.Status.CONFLICT).build();
+            }
+            
+            JMSContext context = cf.createContext();
+            JMSProducer producer = context.createProducer();
+            JMSConsumer consumer = context.createConsumer(plannerReceiveTopic, "type='editRecieve'", false);
+            
+            TaskData taskData = new TaskData();
+            
+            Obaveza task = em.find(Obaveza.class, idO);
+            
+            if (task == null) {
+                return Response.status(Response.Status.CONFLICT).entity("Ne postoji obaveza sa datim id-em.").build();
+            }                        
+            
+            taskData.setTaskId(idO);
+            taskData.setUserId(user.getIdK());
+            
+            if (destination != null && task.getLocation().equals(destination)) {
+                destination = null;
+            }                                                                        
+            
+            if (destination != null) {
+                taskData.setDest(destination);
+            }
+            
+            if (date != null && time != null) {
+                String[] d = date.split("-");
+                String[] t = time.split(":");   
+                
+                int year = Integer.parseInt(d[0]);
+                int month = Integer.parseInt(d[1]);
+                int day = Integer.parseInt(d[2]);
+                int hours = Integer.parseInt(t[0]);
+                int mins = Integer.parseInt(t[1]);
+                
+                Calendar calStart = Calendar.getInstance();
+                calStart.set(year, month, day, hours, mins, 0);
+                Date dt = calStart.getTime();           
+                
+                if (dt.getTime() == task.getPocetak().getTime()) {
+                    date = null;
+                    time = null;
+                } else {
+                    taskData.setDate(dt);
+                }                
+            }                                                                                 
+            
+            if (duration != null) {
+                String[] durString = duration.split(":");
+                
+                int hours = Integer.parseInt(durString[0]);
+                int mins = Integer.parseInt(durString[1]);
+                
+                taskData.setMinutesDuration(hours * 60 + mins);
+                
+                if (taskData.getMinutesDuration() == task.getTrajanje()) {
+                    duration = null;
+                    taskData.setMinutesDuration(-1);
+                }
+            } else {
+                taskData.setMinutesDuration(-1);
+            }                                                                            
+            
+            em.close();
+            emf.close();
+            
+            if (date == null && time == null && duration == null && destination == null) {
+                return Response.status(Response.Status.OK).entity("Nema izmene").build();
+            }
+            
+            ObjectMessage msg = context.createObjectMessage(taskData);
+            msg.setStringProperty("type", "editSend");
+            
+            producer.send(plannerSendTopic, msg);
+            
+            TextMessage rpl = (TextMessage) consumer.receive();
+            
+            if (rpl.getText().equals("1")) {
+                return Response.status(Response.Status.OK).entity("Uspesno").build();
+            }
+            else {
+                return Response.status(Response.Status.CONFLICT).entity("Nije moguce napraviti izmenu").build();
+            }
+            
+        } catch (JMSException ex) {
+            Logger.getLogger(PlannerResource.class.getName()).log(Level.SEVERE, null, ex);
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
+        }        
     }
     
     @GET
@@ -292,8 +404,7 @@ public class PlannerResource {
                 Calendar calStart = Calendar.getInstance();
                 calStart.setTime(task.getPocetak());
                 
-                Calendar calDuration = Calendar.getInstance();
-                calDuration.setTime(task.getTrajanje());
+                int minutesDuration = task.getTrajanje();
                 
                 sb.append(task.getIdO() + " | " + task.getLocation() + " | " + 
                         calStart.get(Calendar.DAY_OF_MONTH) + "." + 
@@ -301,8 +412,8 @@ public class PlannerResource {
                         calStart.get(Calendar.YEAR) + ". " + 
                         calStart.get(Calendar.HOUR_OF_DAY) + ":" +
                         calStart.get(Calendar.MINUTE) + " | " +
-                        calDuration.get(Calendar.HOUR_OF_DAY) + ":" + 
-                        calDuration.get(Calendar.MINUTE));
+                        (minutesDuration / 60) + ":" + 
+                        (minutesDuration % 60));
             }
             
             return Response.status(Response.Status.OK).entity(sb.toString()).build();
@@ -317,7 +428,58 @@ public class PlannerResource {
     @Path("distance/{location1}/{location2}")
     public Response getDistance(@PathParam("location1") String location1, @PathParam("location2") String location2,
                                 @Context HttpHeaders httpHeaders) {
-        return null;
+        try {
+            List<String> authHeaderValues = httpHeaders.getRequestHeader("Authorization");
+            String username = null;
+            String password = null;
+            if(authHeaderValues != null && authHeaderValues.size() > 0){
+                String authHeaderValue = authHeaderValues.get(0);
+                String decodedAuthHeaderValue = new String(Base64.getDecoder().decode(authHeaderValue.replaceFirst("Basic ", "")),StandardCharsets.UTF_8);
+                StringTokenizer stringTokenizer = new StringTokenizer(decodedAuthHeaderValue, ":");
+                username = stringTokenizer.nextToken();
+                password = stringTokenizer.nextToken();
+            }
+            
+            EntityManagerFactory emf = Persistence.createEntityManagerFactory("my_persistence_unit");
+            EntityManager em = emf.createEntityManager();
+            
+            TypedQuery<Korisnik> q =
+                    em.createQuery("select kor from Korisnik kor where kor.password = :password and kor.username = :username", Korisnik.class);
+            q.setParameter("password", password);
+            q.setParameter("username", username);
+            
+            Korisnik user = q.getSingleResult();
+            
+            em.close();
+            emf.close();
+            
+            if (user == null) {
+                return Response.status(Response.Status.CONFLICT).build();
+            }
+            
+            JMSContext context = cf.createContext();
+            JMSProducer producer = context.createProducer();
+            JMSConsumer consumer = context.createConsumer(plannerReceiveTopic, "type='distanceReceive'", false);
+            
+            System.out.println(location1 + ", " + location2);
+            
+            TextMessage msg = context.createTextMessage(location1 + "," + location2);         
+            msg.setStringProperty("type", "distanceSend");
+            
+            producer.send(plannerSendTopic, msg);
+            
+            TextMessage rpl = (TextMessage) consumer.receive();                                    
+            
+            if (rpl.getIntProperty("status") == 0) {
+                return Response.status(Response.Status.CONFLICT).entity(rpl.getText()).build();
+            } else {
+                return Response.status(Response.Status.OK).entity(rpl.getText()).build();
+            }                     
+                       
+        } catch (JMSException ex) {
+            Logger.getLogger(PlannerResource.class.getName()).log(Level.SEVERE, null, ex);
+            return Response.status(Response.Status.CONFLICT).build();
+        }
     }
     
     @GET
@@ -363,7 +525,7 @@ public class PlannerResource {
             JMSProducer producer = context.createProducer();
             JMSConsumer consumer = context.createConsumer(plannerReceiveTopic, "type='alarmRecieve'", false);
             
-            TextMessage msg = context.createTextMessage(user.getIdK() + "");
+            TextMessage msg = context.createTextMessage(idO + "," + user.getIdK());
             msg.setStringProperty("type", "alarmSend");
             producer.send(plannerSendTopic, msg);
             

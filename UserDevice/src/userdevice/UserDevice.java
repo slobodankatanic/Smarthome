@@ -265,13 +265,13 @@ public class UserDevice {
                     break;
                 case 0:
                     response = client
-                    .target("https://geocode.search.hereapi.com/v1/geocode")
-                    // .queryParam("at", "44.805764622277486,20.476015871578806")
-                    .queryParam("q", "Splav Tag Beograd")
-                    .queryParam("limit", 1)
-                    .queryParam("apiKey", "DSitrL2u9LkOmaI7v2mzO9KYJlX08lcAwPFqCQD13YE")
-                    .request()                    
-                    .get();
+                        .target("https://geocode.search.hereapi.com/v1/geocode")
+                        // .queryParam("at", "44.805764622277486,20.476015871578806")
+                        .queryParam("q", "Splav Tag Beograd")
+                        .queryParam("limit", 1)
+                        .queryParam("apiKey", "DSitrL2u9LkOmaI7v2mzO9KYJlX08lcAwPFqCQD13YE")
+                        .request()                    
+                        .get();
                     
                     String r = response.readEntity(String.class);
                     System.out.println(r);                                  
@@ -295,22 +295,157 @@ public class UserDevice {
                 case 12:
                     Scanner inDest = new Scanner(System.in);
                     
-                    System.out.println("Uesite naziv prve lokacije: ");
+                    System.out.print("Unesite naziv prve lokacije: ");
                     String location1 = inDest.nextLine();
                     
-                    System.out.println("Uesite naziv druge lokacije: ");
+                    System.out.print("Unesite naziv druge lokacije: ");
                     String location2 = inDest.nextLine();
                     
                     response = client
-                    .target("http://localhost:8080/CustomerService/smarthome/planner/")                    
-                    .path("distance/{location1}/{location2}")
-                    .resolveTemplate("location1", location1)
-                    .resolveTemplate("location2", location2)
-                    .request()                    
-                    .get();
+                        .target("http://localhost:8080/CustomerService/smarthome/planner/")                    
+                        .path("distance/{location1}/{location2}")
+                        .resolveTemplate("location1", location1)
+                        .resolveTemplate("location2", location2)
+                        .request()                    
+                        .header("Authorization", authorizationHeaderValue)
+                        .get();                                        
                     
-                    System.out.println("Vreme potrebno da se stigne od jedne lokacije na drugu: " + 
-                            response.readEntity(String.class));
+                    System.out.println(response.readEntity(String.class));                    
+                    
+                    ////////////////////
+                    /*
+                    long distance = -1;
+                    try {                        
+                        String jsonLocation1 = client
+                                .target("https://geocode.search.hereapi.com/v1/geocode")
+                                .queryParam("q", "Beograd")
+                                .queryParam("limit", 1)
+                                .queryParam("apiKey", "DSitrL2u9LkOmaI7v2mzO9KYJlX08lcAwPFqCQD13YE")
+                                .request()
+                                .get(String.class);
+                        
+                        // String jsonLocation1 = responseLocation1.readEntity(String.class);                                                
+                        
+                        String jsonLocation2 = client
+                                .target("https://geocode.search.hereapi.com/v1/geocode")
+                                .queryParam("q", "Loznica")
+                                .queryParam("limit", 1)
+                                .queryParam("apiKey", "DSitrL2u9LkOmaI7v2mzO9KYJlX08lcAwPFqCQD13YE")
+                                .request()
+                                .get(String.class);
+                                               
+                        //String jsonLocation2 = responseLocation1.readEntity(String.class);
+
+                        if (jsonLocation1 == null || jsonLocation1.length() == 0 ||
+                            jsonLocation2 == null || jsonLocation2.length() == 0) {
+                            System.out.println("Greska"); continue;
+                        }
+
+                        JSONParser parser = new JSONParser();
+
+                        JSONObject jsonObject1 = (JSONObject) parser.parse(jsonLocation1);
+                        JSONObject jsonObject2 = (JSONObject) parser.parse(jsonLocation2);
+
+                        if (jsonObject1 == null || jsonObject2 == null) {
+                            System.out.println("Greska"); continue;
+                        }
+
+                        if (!jsonObject1.containsKey("items") || !jsonObject2.containsKey("items")) {
+                            System.out.println("Greska"); continue;
+                        }
+
+                        JSONArray items1 = (JSONArray) jsonObject1.get("items");
+                        JSONArray items2 = (JSONArray) jsonObject2.get("items");
+
+                        if (items1.size() == 0 || items1.size() == 0) {
+                            System.out.println("Greska"); continue;
+                        }
+
+                        JSONObject itemsObject1 = (JSONObject) items1.get(0);
+                        JSONObject itemsObject2 = (JSONObject) items2.get(0);
+
+                        if (!itemsObject1.containsKey("position") || !itemsObject2.containsKey("position")) {
+                            System.out.println("Greska"); continue;
+                        }
+
+                        JSONObject position1 = (JSONObject) itemsObject1.get("position");
+                        JSONObject position2 = (JSONObject) itemsObject2.get("position");
+
+                        if (!position1.containsKey("lng") || !position1.containsKey("lat") ||
+                            !position2.containsKey("lng") || !position2.containsKey("lat")) {
+                            System.out.println("Greska"); continue;
+                        }
+
+                        double lat1 = (double) position1.get("lat");
+                        double lng1 = (double) position1.get("lng");            
+
+                        double lat2 = (double) position2.get("lat");
+                        double lng2 = (double) position2.get("lng");                                                            
+
+                        Response responseDuration = client
+                            .target("https://router.hereapi.com/v8/routes")
+                            .queryParam("origin", lat1 + "," + lng1)
+                            .queryParam("destination", lat2 + "," + lng2)
+                            .queryParam("return", "summary,typicalDuration")
+                            .queryParam("transportMode", "car")
+                            .queryParam("apiKey", "DSitrL2u9LkOmaI7v2mzO9KYJlX08lcAwPFqCQD13YE")
+                            .request()
+                            .get();                                
+
+                        if (responseDuration == null) {
+                            System.out.println("Greska"); continue;
+                        }
+
+                        String durationJsonString = responseDuration.readEntity(String.class);
+
+                        if (durationJsonString == null || durationJsonString.length() == 0) {
+                            System.out.println("Greska"); continue;
+                        }                        
+
+                        JSONObject durationJsonObject = (JSONObject) parser.parse(durationJsonString);
+
+                        if (durationJsonObject == null || !durationJsonObject.containsKey("routes")) {
+                            System.out.println("Greska"); continue;
+                        }
+
+                        JSONArray routesArray = (JSONArray) durationJsonObject.get("routes");
+
+                        if (routesArray.size() == 0) {
+                            System.out.println("Greska"); continue;
+                        }
+
+                        JSONObject routesObject = (JSONObject) routesArray.get(0);
+
+                        if (!routesObject.containsKey("sections")) {
+                            System.out.println("Greska"); continue;
+                        }
+
+                        JSONArray sectionsArray = (JSONArray) routesObject.get("sections");
+
+                        if (sectionsArray.size() == 0) {
+                            System.out.println("Greska"); continue;
+                        }
+
+                        JSONObject sectionsObject = (JSONObject) sectionsArray.get(0);
+
+                        if (!sectionsObject.containsKey("summary")) {
+                            System.out.println("Greska"); continue;
+                        }
+
+                        JSONObject summaryObject = (JSONObject) sectionsObject.get("summary");
+
+                        if (!summaryObject.containsKey("duration")) {
+                            System.out.println("Greska"); continue;
+                        }
+
+                        System.out.println(summaryObject.get("duration"));
+
+                    } catch (ParseException ex) {
+                        
+                    }
+                    
+                    ////////////////////
+                    */
                     
                     break;
             }

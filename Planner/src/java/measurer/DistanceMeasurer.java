@@ -30,30 +30,35 @@ public class DistanceMeasurer {
             
     public static long distance(String location1, String location2) {
         try {
+            System.out.println(location1 + ", " + location2);
+            
             Client client = ClientBuilder.newClient();
             
-            Response responseLocation1 = client
+            String jsonLocation1 = client
                     .target("https://geocode.search.hereapi.com/v1/geocode")
                     .queryParam("q", location1)
                     .queryParam("limit", 1)
                     .queryParam("apiKey", "DSitrL2u9LkOmaI7v2mzO9KYJlX08lcAwPFqCQD13YE")
                     .request()
-                    .get();
+                    .get(String.class);
             
-            Response responseLocation2 = client
+            String jsonLocation2 = client
                     .target("https://geocode.search.hereapi.com/v1/geocode")
                     .queryParam("q", location2)
                     .queryParam("limit", 1)
                     .queryParam("apiKey", "DSitrL2u9LkOmaI7v2mzO9KYJlX08lcAwPFqCQD13YE")
                     .request()
-                    .get();
+                    .get(String.class);
             
-            if (responseLocation1 == null || responseLocation2 == null) {
-                return -1;
-            }
+            System.out.println(jsonLocation1);
+            System.out.println(jsonLocation2);
             
-            String jsonLocation1 = responseLocation1.readEntity(String.class);
-            String jsonLocation2 = responseLocation1.readEntity(String.class);
+            //if (responseLocation1 == null || responseLocation2 == null) {
+                //return -1;
+            //}
+            
+            // String jsonLocation1 = responseLocation1.readEntity(String.class);
+            // String jsonLocation2 = responseLocation1.readEntity(String.class);
             
             if (jsonLocation1 == null || jsonLocation1.length() == 0 ||
                 jsonLocation2 == null || jsonLocation2.length() == 0) {
@@ -99,14 +104,14 @@ public class DistanceMeasurer {
             double lng1 = (double) position1.get("lng");            
             
             double lat2 = (double) position2.get("lat");
-            double lng2 = (double) position2.get("lng");                                                            
+            double lng2 = (double) position2.get("lng");                                                                                    
             
             Response responseDuration = client
                 .target("https://router.hereapi.com/v8/routes")
                 .queryParam("origin", lat1 + "," + lng1)
                 .queryParam("destination", lat2 + "," + lng2)
                 .queryParam("return", "summary,typicalDuration")
-                .queryParam("transportMode", "car")
+                .queryParam("transportMode", "car")                    
                 .queryParam("apiKey", "DSitrL2u9LkOmaI7v2mzO9KYJlX08lcAwPFqCQD13YE")
                 .request()
                 .get();                                
@@ -116,6 +121,8 @@ public class DistanceMeasurer {
             }
             
             String durationJsonString = responseDuration.readEntity(String.class);
+            
+            System.out.println(durationJsonString);
             
             if (durationJsonString == null || durationJsonString.length() == 0) {
                 return -1;
@@ -153,11 +160,11 @@ public class DistanceMeasurer {
             
             JSONObject summaryObject = (JSONObject) sectionsObject.get("summary");
             
-            if (!summaryObject.containsKey("duration")) {
+            if (!summaryObject.containsKey("typicalDuration")) {
                 return -1;
             }
                                     
-            return (long) summaryObject.get("duration");
+            return (long) summaryObject.get("typicalDuration");
             
         } catch (ParseException ex) {
             Logger.getLogger(DistanceMeasurer.class.getName()).log(Level.SEVERE, null, ex);

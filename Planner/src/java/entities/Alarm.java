@@ -46,7 +46,7 @@ public class Alarm implements Serializable {
     @Column(name = "IdA")
     private Integer idA;
     @Column(name = "Vreme")
-    @Temporal(TemporalType.TIME)
+    @Temporal(TemporalType.TIMESTAMP)
     private Date vreme;
     @Basic(optional = false)
     @NotNull

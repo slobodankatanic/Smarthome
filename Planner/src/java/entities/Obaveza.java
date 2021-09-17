@@ -53,8 +53,7 @@ public class Obaveza implements Serializable {
     @Basic(optional = false)
     @NotNull
     @Column(name = "Trajanje")
-    @Temporal(TemporalType.TIME)
-    private Date trajanje;
+    private int trajanje;
     @Size(max = 256)
     @Column(name = "location")
     private String location;
@@ -69,7 +68,7 @@ public class Obaveza implements Serializable {
         this.idO = idO;
     }
 
-    public Obaveza(Integer idO, Date pocetak, Date trajanje) {
+    public Obaveza(Integer idO, Date pocetak, int trajanje) {
         this.idO = idO;
         this.pocetak = pocetak;
         this.trajanje = trajanje;
@@ -91,11 +90,11 @@ public class Obaveza implements Serializable {
         this.pocetak = pocetak;
     }
 
-    public Date getTrajanje() {
+    public int getTrajanje() {
         return trajanje;
     }
 
-    public void setTrajanje(Date trajanje) {
+    public void setTrajanje(int trajanje) {
         this.trajanje = trajanje;
     }
 

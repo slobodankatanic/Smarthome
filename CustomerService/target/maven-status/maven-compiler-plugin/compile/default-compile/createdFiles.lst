@@ -1,12 +1,10 @@
-com\mycompany\customerservice\resources\AlarmResource.class
-com\mycompany\customerservice\resources\PlannerResource$1.class
-entities\Korisnik.class
-plannerdata\TaskData.class
-entities\Alarm.class
 entities\Pesma.class
+com\mycompany\customerservice\resources\AlarmResource.class
 com\mycompany\customerservice\JAXRSConfiguration.class
-entities\Lokacija.class
+entities\Korisnik.class
 com\mycompany\customerservice\resources\MusicResource.class
+plannerdata\TaskData.class
 com\mycompany\customerservice\resources\PlannerResource.class
 alarmdata\AlarmData.class
+entities\Alarm.class
 entities\Obaveza.class

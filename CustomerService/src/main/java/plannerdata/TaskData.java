@@ -13,17 +13,26 @@ import java.util.Date;
  * @author pc
  */
 public class TaskData implements Serializable {    
+    private int taskId;
     private int UserId;
     private Date date;
     private String dest;
-    private Date dur;
-
+    private int minutesDuration;    
+    
     public int getUserId() {
         return UserId;
     }
 
     public void setUserId(int UserId) {
         this.UserId = UserId;
+    }
+    
+    public int getTaslId() {
+        return taskId;
+    }
+
+    public void setTaskId(int taskId) {
+        this.taskId = taskId;
     }
 
     public Date getDate() {
@@ -42,13 +51,12 @@ public class TaskData implements Serializable {
         this.dest = dest;
     }
 
-    public Date getDur() {
-        return dur;
+    public int getMinutesDuration() {
+        return minutesDuration;
     }
 
-    public void setDur(Date dur) {
-        this.dur = dur;
+    public void setMinutesDuration(int minutesDuration) {
+        this.minutesDuration = minutesDuration;
     }
-    
-    
+        
 }
