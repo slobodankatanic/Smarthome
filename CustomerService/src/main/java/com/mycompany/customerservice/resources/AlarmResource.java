@@ -54,8 +54,8 @@ public class AlarmResource {
     private Topic recieveTopic;
     
     @POST
-    @Path("set/{hours}/{mins}/{secs}")
-    public Response setAlarm(@PathParam("hours") int hours, @PathParam("mins") int mins, @PathParam("secs") int secs,
+    @Path("set/{time}")
+    public Response setAlarm(@PathParam("time") String time, @QueryParam("date") String date, 
                                 @QueryParam("p") Integer p, @Context HttpHeaders httpHeaders) {
         
         List<String> authHeaderValues = httpHeaders.getRequestHeader("Authorization");
@@ -90,16 +90,56 @@ public class AlarmResource {
         JMSConsumer consumer = context.createConsumer(recieveTopic, "type='set'");
         JMSProducer producer = context.createProducer();
         
-        AlarmData ad = new AlarmData();
-        Calendar cal = Calendar.getInstance();
-        cal.set(Calendar.HOUR_OF_DAY, hours);
-        cal.set(Calendar.MINUTE, mins);
-        cal.set(Calendar.SECOND, secs);
-        cal.set(Calendar.MILLISECOND, 0);
-        Date d = cal.getTime();
+        String[] timeData = time.split(":");
+        int hours = Integer.parseInt(timeData[0]);
+        int mins = Integer.parseInt(timeData[1]);
+        int secs = Integer.parseInt(timeData[2]);
         
-        ad.addTime(d);
+        AlarmData ad = new AlarmData();
+        
+        if (p == null) {
+            int year = 0;
+            int month = 0;
+            int day = 0;
+            
+            if (date != null) {
+                String[] dateData = date.split("-");
+                year = Integer.parseInt(dateData[0]);
+                month = Integer.parseInt(dateData[1]);
+                day = Integer.parseInt(dateData[2]);
+            } else {
+                Date now = new Date();
+                Calendar nowCal = Calendar.getInstance();
+                
+                nowCal.setTime(now);
+                
+                if (nowCal.get(Calendar.HOUR_OF_DAY) > hours ||
+                   (nowCal.get(Calendar.HOUR_OF_DAY) == hours && nowCal.get(Calendar.MINUTE) > mins) || 
+                   (nowCal.get(Calendar.HOUR_OF_DAY) == hours && nowCal.get(Calendar.MINUTE) == mins && nowCal.get(Calendar.SECOND) > secs)) {
+                    nowCal.add(Calendar.DAY_OF_MONTH, 1);
+                }
+                
+                year = nowCal.get(Calendar.YEAR);
+                month = nowCal.get(Calendar.MONTH);
+                day = nowCal.get(Calendar.DAY_OF_MONTH);
+            }
+            
+            Calendar cal = Calendar.getInstance();
+            cal.set(Calendar.YEAR, year);
+            cal.set(Calendar.MONTH, month);
+            cal.set(Calendar.DAY_OF_MONTH, day);
+            cal.set(Calendar.YEAR, year);
+            cal.set(Calendar.HOUR_OF_DAY, hours);
+            cal.set(Calendar.MINUTE, mins);
+            cal.set(Calendar.SECOND, secs);
+            cal.set(Calendar.MILLISECOND, 0);
+            Date d = cal.getTime();
+
+            ad.addTime(d); 
+        }
+                
         ad.setUserId(user.getIdK());
+        
         if (p != null && p == 1) {
             ad.setType("per");
             ad.setPeriod(hours * 60 * 60 + mins * 60 + secs);
@@ -114,11 +154,11 @@ public class AlarmResource {
             
         } catch (JMSException ex) {
             Logger.getLogger(AlarmResource.class.getName()).log(Level.SEVERE, null, ex);
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity("Greska").build();
         }
         
         producer.send(sendTopic, msg);
-        System.out.println("Poslano");
+        
         return Response.status(Response.Status.CREATED).entity("Uspesno kreiran alarm").build();
     }
     

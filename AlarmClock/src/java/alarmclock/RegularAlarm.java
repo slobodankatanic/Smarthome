@@ -57,15 +57,22 @@ public class RegularAlarm extends Thread {
                 //Thread.sleep(alarm.getPerioda() * 1000);
                 Date alarmTime = alarm.getVreme();
                 Date currTime = new Date();
-                System.out.println(currTime.toString());
                 
-                Calendar calA = Calendar.getInstance();
+                /*Calendar calA = Calendar.getInstance();
                 Calendar calC = Calendar.getInstance();
                 calA.setTime(alarmTime);
                 calC.setTime(currTime);
                 
-                long alarmLeft = timeDifference(calC, calA);
-                System.out.println(alarmLeft);
+                long alarmLeft = timeDifference(calC, calA);*/
+                
+                long alarmLeft = alarmTime.getTime() - currTime.getTime();
+                
+                if (alarmLeft < 0) {
+                    em.close();
+                    emf.close();
+                    return;
+                }
+                
                 Thread.sleep(alarmLeft);
                                 
                 em.clear();
@@ -80,6 +87,9 @@ public class RegularAlarm extends Thread {
                 }   
                 
                 //Thread.sleep(60000);
+                
+                em.close();
+                emf.close();
                 
             } catch (InterruptedException | IOException | URISyntaxException ex) {
                 Logger.getLogger(PeriodicAlarm.class.getName()).log(Level.SEVERE, null, ex);

@@ -14,6 +14,9 @@ import javax.json.stream.JsonParser;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.Entity;
+import javax.ws.rs.client.Invocation.Builder;
+import javax.ws.rs.client.WebTarget;
+import javax.ws.rs.core.Form;
 import javax.ws.rs.core.GenericEntity;
 import javax.ws.rs.core.GenericType;
 import javax.ws.rs.core.MediaType;
@@ -33,39 +36,61 @@ public class UserDevice {
      * @param args the command line arguments
      */
     public static void main(String[] args) {
-        Scanner in = new Scanner(System.in);
-        Client client = ClientBuilder.newClient();
-        //HttpAuthenticationFeature feature = HttpAuthenticationFeature.basic("username", "password");
-        //Client client = ClientBuilder.newClient();
-        //client.target("").request().post(Entity.);
-        System.out.print("username: ");
-        String username = in.nextLine();
-        System.out.print("password: ");
-        String password = in.nextLine();
+        Scanner in = new Scanner(System.in);        
+        
+        boolean done = false;
+        
+        String username = null;
+        String password = null;
+        
+        while (!done) {
+            System.out.print("username: ");
+            username = in.nextLine();
+            System.out.print("password: ");
+            password = in.nextLine();
+                                    
+            Client clientAuth = ClientBuilder.newClient();
+            WebTarget target = clientAuth.target("http://localhost:8080/CustomerService/smarthome/login");
+            Builder request = target.request();  
+            
+            Form form = new Form();
+            form.param("username", username);
+            form.param("password", password);
+            Response responseAuth = request.post(Entity.form(form), Response.class);
+            
+            if (responseAuth.getStatus() == 200) {
+                done = true;
+            } else {
+                System.out.println("Pogresni kredencijali.");
+            }
+        }                        
         
         String usernameAndPassword = username + ":" + password;
         String authorizationHeaderValue = "Basic " + java.util.Base64.getEncoder().encodeToString( usernameAndPassword.getBytes() );
         
-        System.out.println("Izaberite opciju:\n\nMuzicki plejer:\n1. Pusti pesmu\n2. Dohvati odslusane pesme\n");
+        System.out.println("\nIzaberite opciju:\n\nMuzicki plejer:\n1. Pusti pesmu\n2. Dohvati odslusane pesme\n");
         System.out.println("Alarm:\n3. Navij obican alarm\n4. Navij periodican alarm\n5. Navij alarm u predefinisanom trenutku\n6. Postavi zvono alarmu\n");
-        System.out.println("Planer:\n7. Napravi obavezu\n8. Izlistaj obaveze\n10. Postavi podsetnik\n11. Obrisi obavezu\n12. Dohvati rastojanje izmedju dve lokacije");
+        System.out.println("Planer:\n7. Napravi obavezu\n8. Izlistaj obaveze\n9. Izmeni obavezu\n10. Obrisi obavezu\n11. Postavi podsetnik\n12. Dohvati rastojanje izmedju dve lokacije\n13. Dohvati rastojanje izmedju od trenutne lokacije\n");
         
-        String[] predefinedAlarms = { "00:00", "00:45", "01:30", "02:15", "03:00", "03:45",
-                                      "04:30", "05:15", "06:00", "06:45", "07:30", "08:15", 
-                                      "09:00", "09:45", "10:30", "11:15", "12:00", "12:45", 
-                                      "13:30", "14:15", "15:00", "15:45", "16:30", "17:15", 
-                                      "18:00", "18:45", "19:30", "20:15", "21:00", "21:45", 
-                                      "22:30", "23:15" };
+        String[] predefinedAlarms = { "00:00:00", "00:45:00", "01:30:00", "02:15:00", "03:00:00", "03:45:00",
+                                      "04:30:00:00", "05:15:00", "06:00:00", "06:45:00", "07:30:00", "08:15:00", 
+                                      "09:00:00", "09:45:00", "10:30:00", "11:15:00", "12:00:00", "12:45:00", 
+                                      "13:30:00", "14:15:00", "15:00:00", "15:45:00", "16:30:00", "17:15:00", 
+                                      "18:00:00", "18:45:00", "19:30:00", "20:15:00", "21:00:00", "21:45:00", 
+                                      "22:30:00", "23:15:00" };
         
         while(true) {
             int num = in.nextInt();
             Response response = null;
             String responseObject = null;
+            String date = null;
+            String time = null;
             int hours, minutes, seconds;
+            Client client = ClientBuilder.newClient();
             switch (num) {
                 case 1: 
                     // prikazi svee pesme, preko servisa zatrazi listu pesama
-                    System.out.print("Unesite id pesme: ");
+                    System.out.print("Unesite identifikator pesme: ");
                     
                     num = in.nextInt();
                     
@@ -92,21 +117,20 @@ public class UserDevice {
                     
                     break;
                 case 3:                    
-                    System.out.print("Unesite sate: ");
-                    hours = in.nextInt();
-                    System.out.print("Unesite minute: ");
-                    minutes = in.nextInt();
-                    System.out.print("Unesite sekunde: ");
-                    seconds = in.nextInt();
+                    Scanner alarmIn = new Scanner(System.in);
+                    
+                    System.out.print("Unesite datum alarma u formatu godina-mesec-dan : ");
+                    date = alarmIn.nextLine();
+                    System.out.print("Unesite vreme alarma u formatu sati:minuti:sekunde : ");
+                    time = alarmIn.nextLine();                    
                     
                     responseObject = new String();
                     
                     response  = client
                     .target("http://localhost:8080/CustomerService/smarthome/alarms/")
-                    .path("set/{hours}/{mins}/{secs}")
-                    .resolveTemplate("hours", hours)
-                    .resolveTemplate("mins", minutes)
-                    .resolveTemplate("secs", seconds)                    
+                    .path("set/{time}")
+                    .queryParam("date", date)                    
+                    .resolveTemplate("time", time)                    
                     .request()
                     .header("Authorization", authorizationHeaderValue)
                     .post(Entity.text(responseObject));
@@ -116,22 +140,18 @@ public class UserDevice {
                     
                     break;
                 case 4:                    
-                    System.out.print("Unesite sate za periodu: ");
-                    hours = in.nextInt();
-                    System.out.print("Unesite minute za periodu: ");
-                    minutes = in.nextInt();
-                    System.out.print("Unesite sekunde za periodu: ");
-                    seconds = in.nextInt();
+                    Scanner alarmScanner = new Scanner(System.in);
+                    
+                    System.out.print("Unesite trajanje periode u formatu sati:minuti:sekunde : ");
+                    time = alarmScanner.nextLine();                                        
                     
                     responseObject = new String();
                     
                     response  = client
                     .target("http://localhost:8080/CustomerService/smarthome/alarms/")
-                    .path("set/{hours}/{mins}/{secs}")
+                    .path("set/{time}")
                     .queryParam("p", 1)
-                    .resolveTemplate("hours", hours)
-                    .resolveTemplate("mins", minutes)
-                    .resolveTemplate("secs", seconds)                    
+                    .resolveTemplate("time", time)
                     .request()
                     .header("Authorization", authorizationHeaderValue)
                     .post(Entity.text(responseObject));
@@ -143,7 +163,7 @@ public class UserDevice {
                 case 5:                    
                     System.out.println("Izaberite jedan od ponudjenih trenutaka:");
                     
-                    int number = 1;
+                    int number = 0;
                     
                     StringBuilder sb1 = new StringBuilder();                    
                     for (String alarm : predefinedAlarms) {
@@ -155,19 +175,14 @@ public class UserDevice {
                     
                     number = in.nextInt();
                     
-                    String[] alarm = predefinedAlarms[number - 1].split(":");
-                    
-                    hours = Integer.parseInt(alarm[0]); 
-                    minutes = Integer.parseInt(alarm[1]); 
+                    String alarm = predefinedAlarms[number - 1];                                        
                     
                     responseObject = new String();
                     
                     response  = client
-                    .target("http://localhost:8080/CustomerService/smarthome/alarms/")
-                    .path("set/{hours}/{mins}/{secs}")                    
-                    .resolveTemplate("hours", hours)
-                    .resolveTemplate("mins", minutes)
-                    .resolveTemplate("secs", 0)                    
+                    .target("http://localhost:8080/CustomerService/smarthome/alarms/")                    
+                    .path("set/{time}")                    
+                    .resolveTemplate("time", alarm)                    
                     .request()
                     .header("Authorization", authorizationHeaderValue)
                     .post(Entity.text(responseObject));
@@ -205,13 +220,13 @@ public class UserDevice {
                 case 7:
                     Scanner inTask = new Scanner(System.in);
                     
-                    System.out.print("Unesite datum pocetka obaveze u formatu godina-mesec-dan: ");
-                    String date = inTask.nextLine();
+                    System.out.print("Unesite datum pocetka obaveze u formatu godina-mesec-dan : ");
+                    date = inTask.nextLine();
                     
-                    System.out.print("Unesite vreme pocetka obaveze u formatu sati:minuti: ");
-                    String time = inTask.nextLine();
+                    System.out.print("Unesite vreme pocetka obaveze u formatu sati:minuti : ");
+                    time = inTask.nextLine();
                     
-                    System.out.print("Unesite trajanje obaveze u formatu sati:minuti: ");
+                    System.out.print("Unesite trajanje obaveze u formatu sati:minuti : ");
                     String duration = inTask.nextLine();
                     
                     System.out.print("Unesite destinaciju obaveze (prazan unos ukoliko se obavlja kod Vase kuce): ");
@@ -221,9 +236,9 @@ public class UserDevice {
                     
                     if (destination.length() > 0) {
                         response  = client
-                        .target("http://localhost:8080/CustomerService/smarthome/planner/")
-                        .queryParam("dest", destination)
+                        .target("http://localhost:8080/CustomerService/smarthome/planner/")                        
                         .path("{date}/{time}/{dur}")
+                        .queryParam("dest", destination)
                         .resolveTemplate("date", date)
                         .resolveTemplate("time", time)
                         .resolveTemplate("dur", duration)
@@ -263,34 +278,139 @@ public class UserDevice {
                     // System.out.println("\n" + response.readEntity(String.class));                    
                     
                     break;
-                case 0:
+                case 9:
                     response = client
-                        .target("https://geocode.search.hereapi.com/v1/geocode")
-                        // .queryParam("at", "44.805764622277486,20.476015871578806")
-                        .queryParam("q", "Splav Tag Beograd")
-                        .queryParam("limit", 1)
-                        .queryParam("apiKey", "DSitrL2u9LkOmaI7v2mzO9KYJlX08lcAwPFqCQD13YE")
-                        .request()                    
-                        .get();
+                    .target("http://localhost:8080/CustomerService/smarthome/planner/list").request()
+                    .header("Authorization", authorizationHeaderValue)
+                    .get();
                     
-                    String r = response.readEntity(String.class);
-                    System.out.println(r);                                  
+                    String[] tasksDataList = response.readEntity(String.class).split(",");
                     
-                    try {
-                        JSONParser parser = new JSONParser();
-                        JSONObject json = (JSONObject) parser.parse(r);
-                        
-                        JSONArray msg = (JSONArray) json.get("items");
-                        JSONObject jo = (JSONObject) msg.get(0);
-                        JSONObject pos = (JSONObject) jo.get("position");
-                        
-                        double lng = (double) pos.get("lng");
-                        double lat = (double) pos.get("lat");
-                        
-                        System.out.println(lng + ", " + lat);
-                    } catch (ParseException ex) {
-                        Logger.getLogger(UserDevice.class.getName()).log(Level.SEVERE, null, ex);
-                    }                                                                              
+                    StringBuilder sbList = new StringBuilder();
+                    for (String task : tasksDataList) {
+                        sbList.append("\n" + task);
+                    }
+                    
+                    System.out.println("\nVase obaveze:\n" + sbList.toString() + "\n");
+                    
+                    Scanner inEdit = new Scanner(System.in);                                        
+                    
+                    System.out.print("Unesite identifikator obaveze: ");
+                    int idO = in.nextInt();
+                    
+                    System.out.print("\nUnesite novi datum u formatu godina-mesec-dan (prazan unos za zadrzavanje stare vrednosti): ");
+                    String newDate = inEdit.nextLine();
+                    
+                    System.out.print("Unesite novo vreme u formatu sati:minuti (prazan unos za zadrzavanje stare vrednosti): ");
+                    String newTime = inEdit.nextLine();
+                    
+                    System.out.print("Unesite novo trajanje u formatu sati:minuti (prazan unos za zadrzavanje stare vrednosti): ");
+                    String newDuration = inEdit.nextLine();
+                    
+                    System.out.print("Unesite novu destinaciju (prazan unos za zadrzavanje stare vrednosti): ");
+                    String newDestination = inEdit.nextLine();
+                                        
+                    WebTarget webTarget = client
+                        .target("http://localhost:8080/CustomerService/smarthome/planner/")                        
+                        .path("edit/{idO}")                        
+                        .resolveTemplate("idO", idO);
+                        //.request()
+                        //.header("Authorization", authorizationHeaderValue)
+                        //.post(Entity.text(responseObject));                                        
+                    
+                    if (newDate.length() > 0) {
+                        webTarget = webTarget.queryParam("date", newDate);
+                    }
+                    
+                    if (newTime.length() > 0) {
+                        webTarget = webTarget.queryParam("time", newTime);
+                    }
+                    
+                    if (newDuration.length() > 0) {
+                        webTarget = webTarget.queryParam("duration", newDuration);
+                    }
+                    
+                    if (newDestination.length() > 0) {
+                        webTarget = webTarget.queryParam("destination", newDestination);
+                    }
+                    
+                    responseObject = new String();
+                    
+                    response = webTarget.request()
+                        .header("Authorization", authorizationHeaderValue)
+                        .post(Entity.text(responseObject));                                        
+                    
+                    responseObject = response.readEntity(String.class);
+                    System.out.println("\n" + responseObject);
+              
+                    break;
+                case 10:
+                    response = client
+                    .target("http://localhost:8080/CustomerService/smarthome/planner/list").request()
+                    .header("Authorization", authorizationHeaderValue)
+                    .get();
+                    
+                    tasksData = response.readEntity(String.class).split(",");
+                    
+                    sb = new StringBuilder();
+                    for (String task : tasksData) {
+                        sb.append("\n" + task);
+                    }
+                    
+                    System.out.println("\nVase obaveze:\n" + sb.toString() + "\n");
+                    
+                    inEdit = new Scanner(System.in);                                        
+                    
+                    System.out.print("Unesite identifikator obaveze: ");
+                    idO = inEdit.nextInt();
+                    
+                    responseObject = new String();
+                    
+                    response = client
+                        .target("http://localhost:8080/CustomerService/smarthome/planner/")                        
+                        .path("{idO}")                   
+                        .resolveTemplate("idO", idO)
+                        .request()
+                        .header("Authorization", authorizationHeaderValue)
+                        .delete();
+                    
+                    responseObject = response.readEntity(String.class);
+                    System.out.println("\n" + responseObject);
+                    
+                    break;
+                case 11:
+                    response = client
+                    .target("http://localhost:8080/CustomerService/smarthome/planner/list").request()
+                    .header("Authorization", authorizationHeaderValue)
+                    .get();
+                    
+                    tasksData = response.readEntity(String.class).split(",");
+                    
+                    sb = new StringBuilder();
+                    for (String task : tasksData) {
+                        sb.append("\n" + task);
+                    }
+                    
+                    System.out.println("\nVase obaveze:\n" + sb.toString() + "\n");
+                    
+                    inEdit = new Scanner(System.in);                                        
+                    
+                    System.out.print("Unesite identifikator obaveze: ");
+                    idO = inEdit.nextInt();
+                    
+                    responseObject = new String();
+                    
+                    response = client
+                        .target("http://localhost:8080/CustomerService/smarthome/planner/")                        
+                        .path("setalarm/{idO}")                   
+                        .resolveTemplate("idO", idO)
+                        .request()
+                        .header("Authorization", authorizationHeaderValue)
+                        .post(Entity.text(responseObject));
+                    
+                    responseObject = response.readEntity(String.class);
+                    System.out.println("\n" + responseObject);
+                    
                     break;
                 case 12:
                     Scanner inDest = new Scanner(System.in);
@@ -310,142 +430,24 @@ public class UserDevice {
                         .header("Authorization", authorizationHeaderValue)
                         .get();                                        
                     
-                    System.out.println(response.readEntity(String.class));                    
+                    System.out.println(response.readEntity(String.class));                                                            
                     
-                    ////////////////////
-                    /*
-                    long distance = -1;
-                    try {                        
-                        String jsonLocation1 = client
-                                .target("https://geocode.search.hereapi.com/v1/geocode")
-                                .queryParam("q", "Beograd")
-                                .queryParam("limit", 1)
-                                .queryParam("apiKey", "DSitrL2u9LkOmaI7v2mzO9KYJlX08lcAwPFqCQD13YE")
-                                .request()
-                                .get(String.class);
-                        
-                        // String jsonLocation1 = responseLocation1.readEntity(String.class);                                                
-                        
-                        String jsonLocation2 = client
-                                .target("https://geocode.search.hereapi.com/v1/geocode")
-                                .queryParam("q", "Loznica")
-                                .queryParam("limit", 1)
-                                .queryParam("apiKey", "DSitrL2u9LkOmaI7v2mzO9KYJlX08lcAwPFqCQD13YE")
-                                .request()
-                                .get(String.class);
-                                               
-                        //String jsonLocation2 = responseLocation1.readEntity(String.class);
-
-                        if (jsonLocation1 == null || jsonLocation1.length() == 0 ||
-                            jsonLocation2 == null || jsonLocation2.length() == 0) {
-                            System.out.println("Greska"); continue;
-                        }
-
-                        JSONParser parser = new JSONParser();
-
-                        JSONObject jsonObject1 = (JSONObject) parser.parse(jsonLocation1);
-                        JSONObject jsonObject2 = (JSONObject) parser.parse(jsonLocation2);
-
-                        if (jsonObject1 == null || jsonObject2 == null) {
-                            System.out.println("Greska"); continue;
-                        }
-
-                        if (!jsonObject1.containsKey("items") || !jsonObject2.containsKey("items")) {
-                            System.out.println("Greska"); continue;
-                        }
-
-                        JSONArray items1 = (JSONArray) jsonObject1.get("items");
-                        JSONArray items2 = (JSONArray) jsonObject2.get("items");
-
-                        if (items1.size() == 0 || items1.size() == 0) {
-                            System.out.println("Greska"); continue;
-                        }
-
-                        JSONObject itemsObject1 = (JSONObject) items1.get(0);
-                        JSONObject itemsObject2 = (JSONObject) items2.get(0);
-
-                        if (!itemsObject1.containsKey("position") || !itemsObject2.containsKey("position")) {
-                            System.out.println("Greska"); continue;
-                        }
-
-                        JSONObject position1 = (JSONObject) itemsObject1.get("position");
-                        JSONObject position2 = (JSONObject) itemsObject2.get("position");
-
-                        if (!position1.containsKey("lng") || !position1.containsKey("lat") ||
-                            !position2.containsKey("lng") || !position2.containsKey("lat")) {
-                            System.out.println("Greska"); continue;
-                        }
-
-                        double lat1 = (double) position1.get("lat");
-                        double lng1 = (double) position1.get("lng");            
-
-                        double lat2 = (double) position2.get("lat");
-                        double lng2 = (double) position2.get("lng");                                                            
-
-                        Response responseDuration = client
-                            .target("https://router.hereapi.com/v8/routes")
-                            .queryParam("origin", lat1 + "," + lng1)
-                            .queryParam("destination", lat2 + "," + lng2)
-                            .queryParam("return", "summary,typicalDuration")
-                            .queryParam("transportMode", "car")
-                            .queryParam("apiKey", "DSitrL2u9LkOmaI7v2mzO9KYJlX08lcAwPFqCQD13YE")
-                            .request()
-                            .get();                                
-
-                        if (responseDuration == null) {
-                            System.out.println("Greska"); continue;
-                        }
-
-                        String durationJsonString = responseDuration.readEntity(String.class);
-
-                        if (durationJsonString == null || durationJsonString.length() == 0) {
-                            System.out.println("Greska"); continue;
-                        }                        
-
-                        JSONObject durationJsonObject = (JSONObject) parser.parse(durationJsonString);
-
-                        if (durationJsonObject == null || !durationJsonObject.containsKey("routes")) {
-                            System.out.println("Greska"); continue;
-                        }
-
-                        JSONArray routesArray = (JSONArray) durationJsonObject.get("routes");
-
-                        if (routesArray.size() == 0) {
-                            System.out.println("Greska"); continue;
-                        }
-
-                        JSONObject routesObject = (JSONObject) routesArray.get(0);
-
-                        if (!routesObject.containsKey("sections")) {
-                            System.out.println("Greska"); continue;
-                        }
-
-                        JSONArray sectionsArray = (JSONArray) routesObject.get("sections");
-
-                        if (sectionsArray.size() == 0) {
-                            System.out.println("Greska"); continue;
-                        }
-
-                        JSONObject sectionsObject = (JSONObject) sectionsArray.get(0);
-
-                        if (!sectionsObject.containsKey("summary")) {
-                            System.out.println("Greska"); continue;
-                        }
-
-                        JSONObject summaryObject = (JSONObject) sectionsObject.get("summary");
-
-                        if (!summaryObject.containsKey("duration")) {
-                            System.out.println("Greska"); continue;
-                        }
-
-                        System.out.println(summaryObject.get("duration"));
-
-                    } catch (ParseException ex) {
-                        
-                    }
+                    break;
+                case 13:
+                    Scanner inLoc = new Scanner(System.in);
                     
-                    ////////////////////
-                    */
+                    System.out.print("Unesite naziv lokacije: ");
+                    String location = inLoc.nextLine();                                        
+                    
+                    response = client
+                        .target("http://localhost:8080/CustomerService/smarthome/planner/")                    
+                        .path("distanceTask/{location}")
+                        .resolveTemplate("location", location)                  
+                        .request()                    
+                        .header("Authorization", authorizationHeaderValue)
+                        .get();                                        
+                    
+                    System.out.println(response.readEntity(String.class));                                                            
                     
                     break;
             }

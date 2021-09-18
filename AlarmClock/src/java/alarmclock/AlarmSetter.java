@@ -49,13 +49,17 @@ public class AlarmSetter extends Thread {
                 
                 Korisnik user = em.find(Korisnik.class, ad.getUserId());
                 newAlarm.setIdK(user);
-
+                
                 Pesma song = em.find(Pesma.class, 1);
                 newAlarm.setIdP(song);
                 
                 newAlarm.setTip("" + ad.getType());
-                newAlarm.setVreme(ad.getTimeList().get(0));
-                if (ad.getType().equals("per")) newAlarm.setPerioda(ad.getPeriod());
+                
+                if (ad.getType().equals("per")) {
+                    newAlarm.setPerioda(ad.getPeriod());
+                } else {
+                    newAlarm.setVreme(ad.getTimeList().get(0));
+                }
                 
                 em.getTransaction().begin();
                 em.persist(newAlarm);
@@ -70,11 +74,9 @@ public class AlarmSetter extends Thread {
                 
                 
             } catch (JMSException ex) {
-                em.close();
-                emf.close();
+                
                 Logger.getLogger(AlarmSetter.class.getName()).log(Level.SEVERE, null, ex);
             }
-        }
-        
+        }                
     }
 }

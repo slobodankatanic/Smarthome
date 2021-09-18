@@ -29,9 +29,7 @@ import org.json.simple.parser.ParseException;
 public class DistanceMeasurer {    
             
     public static long distance(String location1, String location2) {
-        try {
-            System.out.println(location1 + ", " + location2);
-            
+        try {                        
             Client client = ClientBuilder.newClient();
             
             String jsonLocation1 = client
@@ -48,10 +46,7 @@ public class DistanceMeasurer {
                     .queryParam("limit", 1)
                     .queryParam("apiKey", "DSitrL2u9LkOmaI7v2mzO9KYJlX08lcAwPFqCQD13YE")
                     .request()
-                    .get(String.class);
-            
-            System.out.println(jsonLocation1);
-            System.out.println(jsonLocation2);
+                    .get(String.class);                        
             
             //if (responseLocation1 == null || responseLocation2 == null) {
                 //return -1;
@@ -120,9 +115,7 @@ public class DistanceMeasurer {
                 return -1;
             }
             
-            String durationJsonString = responseDuration.readEntity(String.class);
-            
-            System.out.println(durationJsonString);
+            String durationJsonString = responseDuration.readEntity(String.class);                        
             
             if (durationJsonString == null || durationJsonString.length() == 0) {
                 return -1;

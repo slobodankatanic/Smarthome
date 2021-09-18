@@ -40,12 +40,29 @@ public class PeriodicAlarm extends Thread {
         while(true) {
             try {                                                                
                 if (alarm == null) {
+                    em.close();
+                    emf.close();
                     return;
                 }
+                
                 Thread.sleep(alarm.getPerioda() * 1000);                
+                
                 em.clear();
+                
                 alarm = em.find(Alarm.class, idA);                                
+                if (alarm == null) {
+                    em.close();
+                    emf.close();
+                    return;
+                }
+                
                 Pesma song = em.find(Pesma.class, alarm.getIdP().getIdP());
+                if (song == null) {
+                    em.close();
+                    emf.close();
+                    return;
+                }
+                
                 if (Desktop.isDesktopSupported()) {
                     if (song != null) {
                         Desktop.getDesktop().browse(new URI(song.getUrl()));

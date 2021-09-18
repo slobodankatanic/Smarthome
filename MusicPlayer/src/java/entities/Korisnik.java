@@ -65,7 +65,7 @@ public class Korisnik implements Serializable {
     @JoinTable(name = "odslusao", joinColumns = {
         @JoinColumn(name = "IdK", referencedColumnName = "IdK")}, inverseJoinColumns = {
         @JoinColumn(name = "IdP", referencedColumnName = "IdP")})
-    @ManyToMany
+    @ManyToMany(cascade = CascadeType.ALL)
     private List<Pesma> pesmaList;
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "idK")
     private List<Alarm> alarmList;

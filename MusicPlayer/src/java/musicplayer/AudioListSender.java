@@ -21,7 +21,9 @@ import javax.jms.ObjectMessage;
 import javax.jms.Queue;
 import javax.jms.TextMessage;
 import javax.persistence.EntityManager;
+import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
+import javax.persistence.TypedQuery;
 import static musicplayer.Main.cf;
 import static musicplayer.Main.musicListQueue;
 
@@ -32,14 +34,32 @@ import static musicplayer.Main.musicListQueue;
 public class AudioListSender extends Thread {
     
     public ArrayList<Pesma> getSongs(int idK) {
-        EntityManager em = Persistence.createEntityManagerFactory("MusicPlayerPU").createEntityManager();    
-        Korisnik user = em.find(Korisnik.class, idK);
+        EntityManagerFactory emf = Persistence.createEntityManagerFactory("MusicPlayerPU");
+        EntityManager em = emf.createEntityManager();    
+        
+        em.clear();
+        
+        // Korisnik userObject = em.createQuery("SELECT k FROM Korisnik k WHERE k.idK = :idK", Korisnik.class).setParameter("idK", idK).getSingleResult();
+        
+        Korisnik user = em.find(Korisnik.class, idK);        
+        
         ArrayList<Pesma> songs = new ArrayList<>();
         
-        if (user != null) {
-            List<Pesma> songList = user.getPesmaList();
-            for (Pesma p : songList) songs.add(p);
+        if (user != null) {            
+            List<Object[]> resultList = em.createNativeQuery("SELECT idP, idK FROM odslusao WHERE idK = ?").setParameter(1, user.getIdK()).getResultList();
+            /* List<Pesma> songList = user.getPesmaList();
+            if (songList != null) {
+                for (Pesma p : songList) songs.add(p);
+            }*/
+            for (Object[] ids : resultList) {
+                Pesma song = em.find(Pesma.class, ids[0]);
+                songs.add(song);
+            }
         }
+        
+        em.close();
+        emf.close();
+        
         return songs;
     }
     

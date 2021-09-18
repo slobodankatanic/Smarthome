@@ -11,6 +11,7 @@ import java.awt.Desktop;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -34,7 +35,7 @@ import static musicplayer.Main.musicQueue;
  */
 public class AudioPlayer extends Thread {
     
-    public boolean playSong(int idS, int idK) {
+    public boolean playSong(int idS, int idK) {        
         EntityManagerFactory emf = Persistence.createEntityManagerFactory("MusicPlayerPU");
         if (emf == null) {
             return false;
@@ -53,7 +54,7 @@ public class AudioPlayer extends Thread {
                 List<Pesma> songs = user.getPesmaList();
                 boolean listened = false;
                 if (songs != null)
-                    for (Pesma p : songs) {
+                    for (Pesma p : songs) {                        
                         if (p.getIdP() == idS) {
                             listened = true;
                             break;
@@ -62,10 +63,22 @@ public class AudioPlayer extends Thread {
                 
                 if (!listened) {
                     Pesma s = em.find(Pesma.class, idS);
+                    
                     em.getTransaction().begin();
-                    user.getPesmaList().add(s);
+                    
+                    if (songs == null) {
+                        songs = new ArrayList<Pesma>();
+                    } 
+                        
+                    songs.add(s);                        
+                    user.setPesmaList(songs);
+                    
                     em.getTransaction().commit();
                 }
+                
+                em.clear();
+                em.close();
+                emf.close();
                 
                 return true;
             } catch (URISyntaxException | IOException ex) {

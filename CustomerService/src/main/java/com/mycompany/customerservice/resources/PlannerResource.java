@@ -152,7 +152,7 @@ public class PlannerResource {
     
     @DELETE
     @Path("{idO}")
-    public Response deleteTask(@PathParam("date") int idO, @Context HttpHeaders httpHeaders) {
+    public Response deleteTask(@PathParam("idO") int idO, @Context HttpHeaders httpHeaders) {
         
         try {
             List<String> authHeaderValues = httpHeaders.getRequestHeader("Authorization");
@@ -459,9 +459,7 @@ public class PlannerResource {
             
             JMSContext context = cf.createContext();
             JMSProducer producer = context.createProducer();
-            JMSConsumer consumer = context.createConsumer(plannerReceiveTopic, "type='distanceReceive'", false);
-            
-            System.out.println(location1 + ", " + location2);
+            JMSConsumer consumer = context.createConsumer(plannerReceiveTopic, "type='distanceReceive'", false);                        
             
             TextMessage msg = context.createTextMessage(location1 + "," + location2);         
             msg.setStringProperty("type", "distanceSend");
@@ -484,11 +482,61 @@ public class PlannerResource {
     
     @GET
     @Path("distanceTask/{location}")
-    public Response getDistanceFromCurrentTask(@PathParam("location") String location, @Context HttpHeaders httpHeaders) {
-        return null;
+    public Response getDistanceFromCurrentTask(@PathParam("location") String location, @Context HttpHeaders httpHeaders) {        
+        try {
+            List<String> authHeaderValues = httpHeaders.getRequestHeader("Authorization");
+            String username = null;
+            String password = null;
+            if(authHeaderValues != null && authHeaderValues.size() > 0){
+                String authHeaderValue = authHeaderValues.get(0);
+                String decodedAuthHeaderValue = new String(Base64.getDecoder().decode(authHeaderValue.replaceFirst("Basic ", "")),StandardCharsets.UTF_8);
+                StringTokenizer stringTokenizer = new StringTokenizer(decodedAuthHeaderValue, ":");
+                username = stringTokenizer.nextToken();
+                password = stringTokenizer.nextToken();
+            }
+            
+            EntityManagerFactory emf = Persistence.createEntityManagerFactory("my_persistence_unit");
+            EntityManager em = emf.createEntityManager();
+            
+            TypedQuery<Korisnik> q =
+                    em.createQuery("select kor from Korisnik kor where kor.password = :password and kor.username = :username", Korisnik.class);
+            q.setParameter("password", password);
+            q.setParameter("username", username);
+            
+            Korisnik user = q.getSingleResult();
+            
+            em.close();
+            emf.close();
+            
+            if (user == null) {
+                return Response.status(Response.Status.CONFLICT).build();
+            }
+            
+            JMSContext context = cf.createContext();
+            JMSProducer producer = context.createProducer();
+            JMSConsumer consumer = context.createConsumer(plannerReceiveTopic, "type='distanceTaskReceive'", false);
+            
+            TextMessage msg = context.createTextMessage(location);         
+            msg.setStringProperty("type", "distanceTaskSend");
+            msg.setIntProperty("idK", user.getIdK());
+            
+            producer.send(plannerSendTopic, msg);
+            
+            TextMessage rpl = (TextMessage) consumer.receive();                                    
+            
+            if (rpl.getIntProperty("status") == 0) {
+                return Response.status(Response.Status.CONFLICT).entity(rpl.getText()).build();
+            } else {
+                return Response.status(Response.Status.OK).entity(rpl.getText()).build();
+            }                     
+                       
+        } catch (JMSException ex) {
+            Logger.getLogger(PlannerResource.class.getName()).log(Level.SEVERE, null, ex);
+            return Response.status(Response.Status.CONFLICT).build();
+        }
     }
     
-    @GET
+    @POST
     @Path("setalarm/{idO}")
     public Response setTaskAlarm(@PathParam("idO") int idO, @Context HttpHeaders httpHeaders) {
         

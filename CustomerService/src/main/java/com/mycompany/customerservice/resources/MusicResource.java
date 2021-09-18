@@ -76,7 +76,7 @@ public class MusicResource {
         
         if (user == null) {
             return Response.status(Response.Status.CONFLICT).entity("Nisu uneti ispravni kredencijali.").build();
-        }
+        }                
         
         JMSContext context = cf.createContext();        
         JMSProducer producer = context.createProducer();

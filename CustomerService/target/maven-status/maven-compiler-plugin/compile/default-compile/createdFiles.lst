@@ -1,3 +1,4 @@
+com\mycompany\customerservice\resources\Login.class
 entities\Pesma.class
 com\mycompany\customerservice\resources\AlarmResource.class
 com\mycompany\customerservice\JAXRSConfiguration.class
