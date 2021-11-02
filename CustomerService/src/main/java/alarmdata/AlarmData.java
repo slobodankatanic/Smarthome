@@ -54,4 +54,5 @@ public class AlarmData implements Serializable {
     public int getPeriod() {
         return period;
     }
+	
 }

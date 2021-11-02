@@ -17,7 +17,8 @@ import javax.persistence.Persistence;
 import javax.persistence.TypedQuery;
 
 public class Main {
-
+	
+	// for creating destinations
     @Resource(lookup = "shConnectionFactory")
     static ConnectionFactory cf;
     
